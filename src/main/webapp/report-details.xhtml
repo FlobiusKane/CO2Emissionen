@@ -2,11 +2,156 @@
 <html lang="en"
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:f="jakarta.faces.core"
-      xmlns:h="jakarta.faces.html">
-<f:view>
-    <h:head></h:head>
-    <h:body>
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
 
-    </h:body>
-</f:view>
+<ui:composition template="/templates/layout.xhtml">
+    <ui:define name="content">
+        <h:messages globalOnly="true"
+                    layout="list"
+                    styleClass="messages"/>
+        <!-- /event-details.xhtml?eventId=123 -->
+        <f:metadata>
+            <f:viewParam name="eventId" value="#{eventDetailBean.eventId}" />
+            <f:viewAction action="#{eventDetailBean.loadEvent}" />
+        </f:metadata>
+
+        <h:panelGroup rendered="#{empty eventDetailBean.selectedEvent}">
+            <h1>Event nicht gefunden</h1>
+            <h:link value="Zurück zur Event-Liste" outcome="/events.xhtml"/>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{not empty eventDetailBean.selectedEvent}">
+            <h1>#{eventDetailBean.selectedEvent.name}</h1>
+
+            <h:panelGrid columns="2" styleClass="event-detail-grid">
+                <h:outputText value="Ort:"/>
+                <h:outputText value="#{eventDetailBean.selectedEvent.location}"/>
+
+                <h:outputText value="Datum:"/>
+                <h:outputText value="#{eventDetailBean.selectedEvent.date}"/>
+
+                <h:outputText value="Status:"/>
+                <h:outputText value="#{eventDetailBean.selectedEvent.state}"/>
+
+                <h:outputText value="Organisator(en):"/>
+                <h:outputText value="#{eventDetailBean.organizerNames}"/>
+            </h:panelGrid>
+
+            <br/>
+
+            <h2>Sessions</h2>
+
+            <h:panelGroup rendered="#{empty eventDetailBean.selectedEvent.sessions}">
+                <p>Noch keine Sessions erfasst.</p>
+            </h:panelGroup>
+
+            <h:dataTable value="#{eventDetailBean.selectedEvent.sessions}"
+                         var="s"
+                         rendered="#{not empty eventDetailBean.selectedEvent.sessions}"
+                         styleClass="event-table">
+
+                <h:column>
+                    <f:facet name="header">Titel</f:facet>
+                    #{s.title}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Speaker</f:facet>
+                    #{s.speaker}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Raum</f:facet>
+                    #{s.room}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Start</f:facet>
+                    #{s.startTime}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Ende</f:facet>
+                    #{s.endTime}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Organisator</f:facet>
+                    #{s.organizer.firstname} #{s.organizer.name} (#{s.organizer.username})
+                </h:column>
+            </h:dataTable>
+
+            <br/>
+            <h2>Teilnehmende</h2>
+
+            <!-- Für Admin und Organisator: Detaillierte Tabelle -->
+            <h:panelGroup rendered="#{eventDetailBean.canViewParticipants()}">
+                <h:panelGroup rendered="#{empty eventDetailBean.selectedEvent.participants}">
+                    <p>Noch keine Teilnehmenden registriert.</p>
+                </h:panelGroup>
+                <h:dataTable value="#{eventDetailBean.selectedEvent.participants}"
+                             var="p"
+                             rendered="#{not empty eventDetailBean.selectedEvent.participants}"
+                             styleClass="event-table">
+                    <h:column>
+                        <f:facet name="header">Vorname</f:facet>
+                        #{p.user.firstname}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Nachname</f:facet>
+                        #{p.user.name}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Benutzername</f:facet>
+                        #{p.user.username}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">E-Mail</f:facet>
+                        #{p.user.email}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Datum</f:facet>
+                        <h:outputText value="#{p.signupDate}">
+                            <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm" />
+                        </h:outputText>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Status</f:facet>
+                        #{p.status}
+                    </h:column>
+                </h:dataTable>
+            </h:panelGroup>
+
+            <!-- Für andere Benutzer: Nur Anzahl anzeigen -->
+            <h:panelGroup rendered="#{not eventDetailBean.canViewParticipants()}">
+                <p>Anzahl der registrierten Teilnehmenden:
+                    <strong>#{eventDetailBean.selectedEvent.participants.size()}</strong>
+                </p>
+            </h:panelGroup>
+
+            <br/>
+            <h:panelGroup rendered="#{userLoginBean.loggedInUser.orgaOrAdmin}">
+                <h:link value="Session anlegen" outcome="/orga/create-session.xhtml">
+                    <f:param name="eventId" value="#{eventDetailBean.selectedEvent.id}" />
+                </h:link>
+            </h:panelGroup>
+            <h:link value="Zurück zur Event-Liste" outcome="/events.xhtml"/>
+
+            <h:form>
+                <h:commandButton
+                        action="#{eventSignupBean.signupUserForEvent}"
+                        value="Für Event registrieren"
+                        rendered="#{not eventSignupBean.isUserSignedUp}" />
+                <h:commandButton
+                        action="#{eventSignupBean.cancelSignup}"
+                        value="Von diesem Event abmelden"
+                        rendered="#{eventSignupBean.isUserSignedUp}"/>
+            </h:form>
+
+
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>
 </html>
