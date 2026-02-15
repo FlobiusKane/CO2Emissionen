@@ -1,35 +1,54 @@
 package com.example.emissionen.repository;
 
 import com.example.emissionen.report.Report;
+import com.example.emissionen.reportreview.ReviewStatus;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
 
 import java.util.List;
 
 @ApplicationScoped
-public class ReportRepository{
+public class ReportRepository {
 
     private final EntityManager em =
-            Persistence.createEntityManagerFactory("eventmanagerPU")
+            Persistence.createEntityManagerFactory("emissionPU")
                     .createEntityManager();
 
-    public List<Event> findAll(){
-        return this.em.createQuery("SELECT e FROM Event e", Event.class).getResultList();
+    public void save(Report report) {
+        em.getTransaction().begin();
+        em.persist(report);
+        em.getTransaction().commit();
     }
 
-    public Event findById(Long id) {
-        Event event = em.find(Event.class, id);
-        if (event != null){
-            em.refresh(event);
-        }
-        return event;
+    public void update(Report report) {
+        em.getTransaction().begin();
+        em.merge(report);
+        em.getTransaction().commit();
     }
 
-    public void save(Event event){
-        this.em.getTransaction().begin();
-        this.em.persist(event);
-        this.em.getTransaction().commit();
-        this.em.clear();
+    public List<Report> findAll() {
+        return em.createQuery("SELECT r FROM Report r", Report.class)
+                .getResultList();
+    }
+
+    public List<Report> findPending() {
+        return em.createQuery(
+                        "SELECT r FROM Report r WHERE r.status = :status",
+                        Report.class)
+                .setParameter("status", ReviewStatus.PENDING)
+                .getResultList();
+    }
+
+    public Report findById(Long id) {
+        return em.find(Report.class, id);
+    }
+
+
+    public List<Report> findByUser(Long userId) {
+        return em.createQuery(
+                        "SELECT r FROM Report r WHERE r.submittedBy.id = :uid",
+                        Report.class)
+                .setParameter("uid", userId)
+                .getResultList();
     }
 }

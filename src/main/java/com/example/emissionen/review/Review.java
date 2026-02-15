@@ -1,103 +1,66 @@
 package com.example.emissionen.review;
 
-
-import com.example.emissionen.report.Event;
+import com.example.emissionen.report.Report;
+import com.example.emissionen.reportreview.ReviewStatus;
 import com.example.emissionen.usermanagement.User;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "sessions")
 public class Review {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
 
-    private String title;
+    @ManyToOne
+    private Report report;
 
-    private String speaker;
-    private String room;
+    @ManyToOne
+    private User reviewer;
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String comment;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @Enumerated(EnumType.STRING)
+    private ReviewStatus status;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "organizer_user_id")
-    private User organizer;
-
-    protected Review() {}
-
-    public Review(String title, String speaker, String room, LocalDateTime startTime, LocalDateTime endTime) {
-        this.title = title;
-        this.speaker = speaker;
-        this.room = room;
-        this.startTime = startTime;
-        this.endTime = endTime;
+    public Long getId() {
+        return id;
     }
 
-    public String getTitle() {
-        return title;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public Report getReport() {
+        return report;
     }
 
-    public String getSpeaker() {
-        return speaker;
+    public void setReport(Report report) {
+        this.report = report;
     }
 
-    public void setSpeaker(String speaker) {
-        this.speaker = speaker;
+    public User getReviewer() {
+        return reviewer;
     }
 
-    public String getRoom() {
-        return room;
+    public void setReviewer(User reviewer) {
+        this.reviewer = reviewer;
     }
 
-    public void setRoom(String room) {
-        this.room = room;
+    public String getComment() {
+        return comment;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
+    public ReviewStatus getStatus() {
+        return status;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public void setStatus(ReviewStatus status) {
+        this.status = status;
     }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Event getEvent() {
-        return event;
-    }
-
-    public void setEvent(Event event) {
-        this.event = event;
-    }
-
-    public User getOrganizer() {
-        return organizer;
-    }
-
-    public void setOrganizer(User organizer) {
-        this.organizer = organizer;
-    }
-
-
 }
+

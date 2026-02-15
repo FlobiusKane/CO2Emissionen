@@ -23,7 +23,7 @@ public class ReviewerDTO {
         return state;
     }
 
-    public ParticipantDTO(String name, String firstname, String email, String state){
+    public ReviewerDTO(String name, String firstname, String email, String state){
         this.email = email;
         this.name = name;
         this.firstname = firstname;

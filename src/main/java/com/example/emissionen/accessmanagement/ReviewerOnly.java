@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @InterceptorBinding // was will tun?
 @Target({ElementType.METHOD, ElementType.TYPE}) // worauf soll es wirken?
 @Retention(RetentionPolicy.RUNTIME) // zu welcher "zeit" soll es wirken?
-public @interface ResearcherOnly {
+public @interface ReviewerOnly {
 }

@@ -17,8 +17,8 @@ public class User {
     private Long id;
 
     private String username;
-    private String name;
     private String firstname;
+    private String name;
     private String email;
     private String location;
     private String state;
@@ -27,22 +27,32 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToMany(mappedBy = "organizer")
-    private List<Event> organizedEvents = new ArrayList<>();
+    /*
+        ========== BEZIEHUNGEN ==========
+    */
 
-    @OneToMany(mappedBy = "organizer")
-    private List<Session> organizedSessions = new ArrayList<>();
+    // Reports, die dieser User eingereicht hat
+    @OneToMany(mappedBy = "submittedBy", cascade = CascadeType.ALL)
+    private List<Report> submittedReports = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventSignup> eventSignups = new ArrayList<>();
+    // Reviews, die dieser User durchgeführt hat
+    @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL)
+    private List<ReportReview> reportReviews = new ArrayList<>();
+
+
+    /*
+        ========== KONSTRUKTOREN ==========
+    */
 
     public User() {}
 
-    public User(String username, String name, String firstname, String email, String location, String state, String password,
-                UserRole role) {
+    public User(String username, String firstname, String name,
+                String email, String location, String state,
+                String password, UserRole role) {
+
         this.username = username;
-        this.name = name;
         this.firstname = firstname;
+        this.name = name;
         this.email = email;
         this.location = location;
         this.state = state;
@@ -50,19 +60,41 @@ public class User {
         this.role = role;
     }
 
-    public User(UserRegistrationDTO newUserDTO){
-        this.username = newUserDTO.getUsername();
-        this.name = newUserDTO.getName();
-        this.email = newUserDTO.getEmail();
-        this.password = newUserDTO.getPassword();
-        this.firstname = newUserDTO.getFirstname();
-        this.location = newUserDTO.getLocation();
-        this.role = newUserDTO.getRole();
-        this.state = newUserDTO.getState();
+    public User(UserRegistrationDTO dto) {
+        this.username = dto.getUsername();
+        this.firstname = dto.getFirstname();
+        this.name = dto.getName();
+        this.email = dto.getEmail();
+        this.location = dto.getLocation();
+        this.state = dto.getState();
+        this.password = dto.getPassword();
+        this.role = dto.getRole();
     }
 
-    public boolean isOrgaOrAdmin(){
-        return role.equals(UserRole.ORGANISATOR) || role.equals(UserRole.ADMIN);
+
+    /*
+        ========== ROLLEN-HILFSMETHODEN ==========
+    */
+
+    public boolean isResearcher() {
+        return role == UserRole.RESEARCHER;
+    }
+
+    public boolean isReviewer() {
+        return role == UserRole.REVIEWER;
+    }
+
+    public boolean isAdmin() {
+        return role == UserRole.ADMIN;
+    }
+
+
+    /*
+        ========== GETTER & SETTER ==========
+    */
+
+    public Long getId() {
+        return id;
     }
 
     public String getUsername() {
@@ -73,6 +105,14 @@ public class User {
         this.username = username;
     }
 
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
     public String getName() {
         return name;
     }
@@ -81,12 +121,8 @@ public class User {
         this.name = name;
     }
 
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public String getFullName() {
+        return firstname + " " + name;
     }
 
     public String getEmail() {
@@ -129,29 +165,21 @@ public class User {
         this.role = role;
     }
 
-    public List<Event> getOrganizedEvents() {
-        return organizedEvents;
+    public List<Report> getSubmittedReports() {
+        return submittedReports;
     }
 
-    public void setOrganizedEvents(List<Event> organizedEvents) {
-        this.organizedEvents = organizedEvents;
+    public void setSubmittedReports(List<Report> submittedReports) {
+        this.submittedReports = submittedReports;
     }
 
-    public List<Session> getOrganizedSessions() {
-        return organizedSessions;
+    public List<ReportReview> getReportReviews() {
+        return reportReviews;
     }
 
-    public void setOrganizedSessions(List<Session> organizedSessions) {
-        this.organizedSessions = organizedSessions;
+    public void setReportReviews(List<ReportReview> reportReviews) {
+        this.reportReviews = reportReviews;
     }
 
-    public List<EventSignup> getEventSignups() {
-        return eventSignups;
-    }
 
-    public void setEventSignups(List<EventSignup> eventSignups) {
-        this.eventSignups = eventSignups;
-    }
-
-    public Long getId() { return id;}
 }

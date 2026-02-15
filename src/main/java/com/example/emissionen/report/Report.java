@@ -1,54 +1,37 @@
 package com.example.emissionen.report;
 
-import iu.piisj.eventmanager.eventsignup.EventSignup;
-import iu.piisj.eventmanager.session.Session;
-import iu.piisj.eventmanager.usermanagement.User;
+import com.example.emissionen.reportreview.ReportReview;
+import com.example.emissionen.reportreview.ReviewStatus;
+import com.example.emissionen.review.Review;
+import com.example.emissionen.usermanagement.User;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "events")
 public class Report {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private Long id;
 
-    public String getName() {
-        return name;
-    }
+    private String country;
+    private int year;
+    private double emissionValue;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    @Enumerated(EnumType.STRING)
+    private ReviewStatus status = ReviewStatus.PENDING;
 
-    @ManyToOne()
-    @JoinColumn(name = "organizer_user_id")
-    private User organizer;
+    @ManyToOne
+    private User submittedBy;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Session> sessions = new ArrayList<>();
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
+    private List<Review> reviews;
 
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventSignup> participants = new ArrayList<>();
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
+    private List<ReportReview> reportReviews;
 
-    private String name;
-    private String location;
-    private String date;
-    private String state;
 
-    protected Event(){}
-
-    public Event(String name, String location, String date, String state){
-        this.name = name;
-        this.location = location;
-        this.date = date;
-        this.state = state;
-    }
-
-    // Getter & Setter
     public Long getId() {
         return id;
     }
@@ -57,51 +40,51 @@ public class Report {
         this.id = id;
     }
 
-    public String getLocation() {
-        return location;
+    public String getCountry() {
+        return country;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setCountry(String country) {
+        this.country = country;
     }
 
-    public String getDate() {
-        return date;
+    public int getYear() {
+        return year;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setYear(int year) {
+        this.year = year;
     }
 
-    public String getState() {
-        return state;
+    public double getEmissionValue() {
+        return emissionValue;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setEmissionValue(double emissionValue) {
+        this.emissionValue = emissionValue;
     }
 
-    public User getOrganizer() {
-        return organizer;
+    public ReviewStatus getStatus() {
+        return status;
     }
 
-    public void setOrganizer(User organizer) {
-        this.organizer = organizer;
+    public void setStatus(ReviewStatus status) {
+        this.status = status;
     }
 
-    public List<Session> getSessions() {
-        return sessions;
+    public User getSubmittedBy() {
+        return submittedBy;
     }
 
-    public void setSessions(List<Session> sessions) {
-        this.sessions = sessions;
+    public void setSubmittedBy(User submittedBy) {
+        this.submittedBy = submittedBy;
     }
 
-    public List<EventSignup> getParticipants() {
-        return participants;
+    public List<Review> getReviews() {
+        return reviews;
     }
 
-    public void setParticipants(List<EventSignup> participants) {
-        this.participants = participants;
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 }

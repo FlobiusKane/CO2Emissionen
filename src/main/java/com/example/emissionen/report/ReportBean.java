@@ -1,67 +1,38 @@
 package com.example.emissionen.report;
 
-import com.example.emissionen.accessmanagement.ResearcherOnly;
-import com.example.emissionen.dto.ReportDTO;
 import com.example.emissionen.repository.ReportRepository;
-import com.example.emissionen.usermanagement.User;
-import com.example.emissionen.usermanagement.UserRole;
-import jakarta.annotation.security.RolesAllowed;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.faces.application.FacesMessage;
-import jakarta.faces.context.FacesContext;
+import com.example.emissionen.usermanagement.UserLoginBean;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Named
-@RequestScoped
-public class ReportBean {
+@ViewScoped
+public class ReportBean implements Serializable {
 
     @Inject
-    private EventRepository eventRepository;
-    private EventDTO newEventDTO = new EventDTO();
+    private ReportRepository reportRepository;
 
-    // diese annotation sorgt dafür dass nur eingeloggte user mit den rollen
-    // ORGANISATOR oder ADMIN diese Methode aufrufen können
-    // sonst kommt es zu einem 403 Fehler
-    @OrganizerOnly
-    public void saveEvent(){
+    @Inject
+    private UserLoginBean loginBean;
 
-        Event newEvent = this.mapDTOToEntity(this.newEventDTO);
+    private Report report = new Report();
 
-        User u = (User) FacesContext.getCurrentInstance()
-                .getExternalContext()
-                .getSessionMap()
-                .get("user");
-
-        newEvent.setOrganizer(u);
-
-        FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Event angelegt",
-                        "Es wurde ein neues Event angelegt"));
-
-        this.eventRepository.save(newEvent);
-
+    public void submit() {
+        report.setSubmittedBy(loginBean.getLoggedInUser());
+        reportRepository.save(report);
+        report = new Report();
     }
 
-    private Event mapDTOToEntity(EventDTO dto){
-        return new Event(dto.getName(), dto.getLocation(), dto.getDate(), dto.getState());
+    public List<Report> getAllReports() {
+        return reportRepository.findAll();
     }
 
-    public List<Event> getAllEvents() {
-        return this.eventRepository.findAll();
-    }
 
-    public List<String> getAvailableStatuses() {
-        return List.of("Geplant", "Offen", "Abgeschlossen");
-    }
-
-    public EventDTO getNewEventDTO() {
-        return newEventDTO;
-    }
-
-    public void setNewEventDTO(EventDTO newEventDTO) {
-        this.newEventDTO = newEventDTO;
+    public Report getReport() {
+        return report;
     }
 }

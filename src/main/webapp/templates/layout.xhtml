@@ -4,7 +4,7 @@
       xmlns:ui="jakarta.faces.facelets">
 
 <h:head>
-    <title>Konferenzverwaltung</title>
+    <title>CO₂ Emissions Reporting System</title>
     <h:outputStylesheet library="css" name="style.css"/>
 </h:head>
 
@@ -12,22 +12,36 @@
 
     <header>
         <h:graphicImage
-                value = "https://www.iu.de/logos/iu-logo.svg" width="150px"/>
-        <h1>Event Management System</h1>
+                value="https://www.iu.de/logos/iu-logo.svg"
+                width="150px"/>
+
+        <h1>CO₂ Emissions Reporting System</h1>
+
         <nav>
-            <h:link value="Start" outcome="/index"/>
+            <h:link value="Start" outcome="/index.xhtml"/>
+
             <h:panelGroup rendered="#{userLoginBean.loggedIn}">
                 |
-                <h:link value="Alle Veranstaltungen" outcome="/events"/>
+                <h:link value="Alle Reports" outcome="/reports.xhtml"/>
                 |
-                <h:link value="Meine Veranstaltungen" outcome="/my-events"/>
+                <h:link value="Meine Reports" outcome="/my-reports.xhtml"/>
+
+                <!-- Nur Reviewer oder Admin sehen Review -->
+                <h:panelGroup rendered="#{
+                        userLoginBean.loggedInUser.role eq 'REVIEWER'
+                        or userLoginBean.loggedInUser.role eq 'ADMIN'}">
+                    |
+                    <h:link value="Review" outcome="/review.xhtml"/>
+                </h:panelGroup>
             </h:panelGroup>
         </nav>
+
         <br/>
+
         <h:panelGroup rendered="#{userLoginBean.loggedIn}">
             Willkommen #{userLoginBean.loggedInUser.username}
             |
-            Du bist in der Rolle #{userLoginBean.loggedInUser.role}
+            Rolle: #{userLoginBean.loggedInUser.role}
             |
             <h:form style="display:inline">
                 <h:commandLink value="Logout"
@@ -41,7 +55,10 @@
     </main>
 
     <footer>
-        <p>DSBPIIJEE01 - Programmierung industrieller Informationssysteme mit Java EE - WS 2025/26</p>
+        <p>
+            DSBPIIJEE01 - Java EE Projekt -
+            CO₂ Emissions Reporting und Peer Review System - WS 2025/26
+        </p>
     </footer>
 
 </h:body>

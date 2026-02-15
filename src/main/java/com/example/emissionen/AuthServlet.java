@@ -1,7 +1,7 @@
-package iu.piisj.eventmanager;
+package com.example.emissionen;
 
 
-import iu.piisj.eventmanager.usermanagement.User;
+import com.example.emissionen.usermanagement.User;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,12 +59,6 @@ public class AuthServlet implements Filter {
             return;
         }
 
-        // Besonderen Schutz für die Orga Seiten
-        boolean isOrgaPage = path.startsWith("/orga/");
-        if (isOrgaPage && !user.isOrgaOrAdmin()){
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
 
         chain.doFilter(request, response);
 

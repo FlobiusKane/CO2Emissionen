@@ -7,15 +7,14 @@
     <persistence-unit name="eventmanagerPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>iu.piisj.eventmanager.event.Event</class>
-        <class>iu.piisj.eventmanager.session.Session</class>
-        <class>iu.piisj.eventmanager.eventsignup.EventSignup</class>
-        <class>iu.piisj.eventmanager.usermanagement.User</class>
+        <class>com.example.emissionen.report.Report</class>
+        <class>com.example.emissionen.reportreview.ReportReview</class>
+        <class>com.example.emissionen.usermanagement.User</class>
 
         <properties>
             <!-- Für die Datenbank selbst -->
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:file:/Users/heinke.hihn/IdeaProjects/eventmanager/data/eventdb;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:file:/Users/licht/IdeaProjects/Emissionen/data/eventdb;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE"/>
             <property name="jakarta.persistence.jdbc.user" value="sa"/>
             <property name="jakarta.persistence.jdbc.password" value=""/>
             <property name="hibernate.cache.use_second_level_cache" value="false"/>

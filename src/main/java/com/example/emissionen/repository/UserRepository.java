@@ -1,6 +1,6 @@
 package com.example.emissionen.repository;
 
-import iu.piisj.eventmanager.usermanagement.User;
+import com.example.emissionen.usermanagement.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;

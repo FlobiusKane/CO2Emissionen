@@ -1,9 +1,10 @@
 package com.example.emissionen.report;
 
-import com.example.emissionen.repository.EventRepository;
+import com.example.emissionen.repository.ReportRepository;
 import com.example.emissionen.usermanagement.User;
 import com.example.emissionen.usermanagement.UserLoginBean;
 import com.example.emissionen.usermanagement.UserRole;
+import jakarta.annotation.PostConstruct;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -15,59 +16,89 @@ import java.io.Serializable;
 public class ReportDetailsBean implements Serializable {
 
     @Inject
-    private EventRepository eventRepository;
+    private ReportRepository reportRepository;
 
-    private Long eventId;
-    private Event selectedEvent;
-    @Named
     @Inject
     private UserLoginBean userLoginBean;
 
-    public boolean canViewParticipants(){
+    private Long reportId;
+    private Report selectedReport;
+
+    /*
+        ====== Initialisierung ======
+     */
+    @PostConstruct
+    public void init() {
+        loadReport();
+    }
+
+    public void loadReport() {
+        if (reportId == null) {
+            selectedReport = null;
+            return;
+        }
+
+        selectedReport = reportRepository.findById(reportId);
+    }
+
+    /*
+        ====== Zugriffskontrolle ======
+     */
+    public boolean canEditReport() {
+
         User currentUser = userLoginBean.getLoggedInUser();
 
-        if (currentUser == null || selectedEvent == null){
+        if (currentUser == null || selectedReport == null) {
             return false;
         }
 
-        if (currentUser.getRole().equals(UserRole.ADMIN)){
+        // Admin darf immer
+        if (currentUser.getRole() == UserRole.ADMIN) {
             return true;
         }
 
-        User eventOrganizer = selectedEvent.getOrganizer();
-        return (eventOrganizer != null && currentUser.getId().equals(eventOrganizer.getId()));
-    }
-
-    public void loadEvent(){
-        if (eventId == null){
-            selectedEvent = null;
-            return;
+        // Reviewer darf prüfen
+        if (currentUser.getRole() == UserRole.REVIEWER) {
+            return true;
         }
-        selectedEvent = eventRepository.findById(eventId);
+
+        // Researcher darf nur eigene Reports bearbeiten
+        return selectedReport.getSubmittedBy() != null
+                && currentUser.getId()
+                .equals(selectedReport.getSubmittedBy().getId());
     }
 
-    public String getOrganizerNames(){
-        loadEvent();
-        User organizer = selectedEvent.getOrganizer();
-        if (selectedEvent == null || organizer == null){
+    /*
+        ====== Anzeige Autorname ======
+     */
+    public String getAuthorName() {
+
+        if (selectedReport == null
+                || selectedReport.getSubmittedBy() == null) {
             return "";
         }
-        return organizer.getFirstname() + " " + organizer.getName();
+
+        User author = selectedReport.getSubmittedBy();
+        return author.getFirstname() + " " + author.getName();
     }
 
-    public Long getEventId() {
-        return eventId;
+    /*
+        ====== Getter & Setter ======
+     */
+
+    public Long getReportId() {
+        return reportId;
     }
 
-    public void setEventId(Long eventId) {
-        this.eventId = eventId;
+    public void setReportId(Long reportId) {
+        this.reportId = reportId;
     }
 
-    public Event getSelectedEvent() {
-        return selectedEvent;
+    public Report getSelectedReport() {
+        return selectedReport;
     }
 
-    public void setSelectedEvent(Event selectedEvent) {
-        this.selectedEvent = selectedEvent;
+    public void setSelectedReport(Report selectedReport) {
+        this.selectedReport = selectedReport;
     }
 }

@@ -1,123 +1,106 @@
 package com.example.emissionen.review;
 
-import iu.piisj.eventmanager.accessmanagement.OrganizerOnly;
-import iu.piisj.eventmanager.dto.SessionDTO;
-import iu.piisj.eventmanager.event.EventDetailBean;
-import iu.piisj.eventmanager.service.SessionService;
-import iu.piisj.eventmanager.usermanagement.User;
-import iu.piisj.eventmanager.usermanagement.UserLoginBean;
-import jakarta.faces.application.FacesMessage;
-import jakarta.faces.context.FacesContext;
+
+import com.example.emissionen.report.Report;
+import com.example.emissionen.reportreview.ReportReview;
+import com.example.emissionen.reportreview.ReviewStatus;
+import com.example.emissionen.repository.ReportRepository;
+import com.example.emissionen.repository.ReportReviewRepository;
+import com.example.emissionen.usermanagement.UserLoginBean;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Named
 @ViewScoped
 public class ReviewBean implements Serializable {
 
     @Inject
-    private SessionService sessionService;
+    private ReportRepository reportRepository;
 
     @Inject
-    private UserLoginBean userLoginBean;
+    private ReportReviewRepository reviewRepository;
 
     @Inject
-    private EventDetailBean eventDetailBean;
+    private UserLoginBean loginBean;
 
-    @Inject
-    private FacesContext facesContext;
+    private Report selectedReport;
+    private String comment;
 
-    private Long eventId;
-    private SessionDTO newSessionDTO = new SessionDTO();
-
-    public boolean checkAuthorization(){
-        User currentUser = userLoginBean.getLoggedInUser();
-        if (eventId != null){
-            return sessionService.canCreateSession(currentUser, eventId);
-        } else {
-            return false;
-        }
+    public List<Report> getPendingReports() {
+        return reportRepository.findPending();
     }
 
-    @OrganizerOnly
-    public String createSession(){
+    public void approve() {
 
-        User currentUser = userLoginBean.getLoggedInUser();
+        Review review = new Review();
+        review.setReport(selectedReport);
+        review.setReviewer(loginBean.getLoggedInUser());
+        review.setStatus(ReviewStatus.APPROVED);
 
-        String validationError = validateSession();
-        if (validationError != null){
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                    validationError, null));
-            return null;
-        }
+        selectedReport.setStatus(ReviewStatus.APPROVED);
 
-        Session session = new Session(
-                newSessionDTO.getTitle(),
-                newSessionDTO.getSpeaker(),
-                newSessionDTO.getRoom(),
-                newSessionDTO.getStartTime(),
-                newSessionDTO.getEndTime()
-        );
-
-        boolean success = sessionService.createSession(session, currentUser, eventId);
-
-        if (success) {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
-                    "Session erfolgreich angelegt.", null));
-
-            // erzwinge einen reload
-            // wichtig weil eventdetailbean lädt das event im eager modus, also zu beginn
-            // wenn es erzeugt wird und dann nur "auf nachfrage"
-            if (eventDetailBean != null){
-                eventDetailBean.loadEvent();
-            }
-
-            newSessionDTO = new SessionDTO();
-            // setzt eine reload der seite um
-            // wichtig: seite (view) unabhängig vom bean arbeitet
-            return "redirect:/event-details.xhtml?eventId=" + eventId + "&faces-redirect=true";
-
-        } else {
-            facesContext.addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Fehler beim Erstellen der Session", null));
-            return null;
-        }
-
+        ReportReview ReportReview = new ReportReview();
+        reviewRepository.save(ReportReview);
+        reportRepository.update(selectedReport);
     }
 
-    private String validateSession(){
-        if (newSessionDTO.getTitle() == null || newSessionDTO.getTitle().trim().isEmpty()){
-            return "Titel ist erforderlich";
-        }
+    public void reject() {
 
-        if (newSessionDTO.getStartTime() == null || newSessionDTO.getEndTime() == null){
-            return "Start- und Endzeit sind erforderlich.";
-        }
+        Review review = new Review();
+        review.setReport(selectedReport);
+        review.setReviewer(loginBean.getLoggedInUser());
+        review.setStatus(ReviewStatus.REJECTED);
+        review.setComment(comment);
 
-        if (newSessionDTO.getStartTime().isAfter(newSessionDTO.getEndTime())){
-            return "Startzeit muss vor Endzeit liegen.";
-        }
+        selectedReport.setStatus(ReviewStatus.REJECTED);
 
-        return null;
+        ReportReview ReportReview = new ReportReview();
+        reviewRepository.save(ReportReview);
+        reportRepository.update(selectedReport);
     }
 
-    public SessionDTO getNewSessionDTO() {
-        return newSessionDTO;
+    public ReportRepository getReportRepository() {
+        return reportRepository;
     }
 
-    public void setNewSessionDTO(SessionDTO newSessionDTO) {
-        this.newSessionDTO = newSessionDTO;
+    public void setReportRepository(ReportRepository reportRepository) {
+        this.reportRepository = reportRepository;
     }
 
-    public Long getEventId() {
-        return eventId;
+    public ReportReviewRepository getReviewRepository() {
+        return reviewRepository;
     }
 
-    public void setEventId(Long eventId) {
-        this.eventId = eventId;
+    public void setReviewRepository(ReportReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
+    }
+
+    public UserLoginBean getLoginBean() {
+        return loginBean;
+    }
+
+    public void setLoginBean(UserLoginBean loginBean) {
+        this.loginBean = loginBean;
+    }
+
+    public Report getSelectedReport() {
+        return selectedReport;
+    }
+
+    public void setSelectedReport(Report selectedReport) {
+        this.selectedReport = selectedReport;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
+

@@ -1,9 +1,9 @@
 package com.example.emissionen.reportreview;
 
-import com.example.emissionen.report.Event;
+import com.example.emissionen.report.Report;
+import com.example.emissionen.repository.ReportRepository;
 import com.example.emissionen.repository.ReportReviewRepository;
 import com.example.emissionen.usermanagement.User;
-import com.example.emissionen.report.EventDetailBean;
 import com.example.emissionen.usermanagement.UserLoginBean;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
@@ -17,137 +17,112 @@ import java.util.List;
 
 @Named
 @ViewScoped
-public class ReportReviewBean  implements Serializable {
+public class ReportReviewBean implements Serializable {
 
     @Inject
-    private EventDetailBean eventDetailBean;
+    private ReportRepository reportRepository;
+
+    @Inject
+    private ReportReviewRepository reportReviewRepository;
 
     @Inject
     private UserLoginBean userLoginBean;
 
     @Inject
-    private EventSignupService eventSignupService;
-
-    @Inject
-    private EventSignupRepository eventSignupRepository;
-
-    @Inject
     private FacesContext facesContext;
 
-    private boolean isUserSignedUp;
-    private List<EventSignup> eventSignups;
+    private List<Report> pendingReports;
 
-    // wird nach dem constructor aufgerufen
+    private Report selectedReport;
+    private String comment;
+
     @PostConstruct
-    public void init(){
-        if (eventDetailBean != null && eventDetailBean.getSelectedEvent() != null){
-            loadSignupStatus();
-            loadSignups();
-        }
+    public void init() {
+        pendingReports = reportRepository.findPending();
     }
 
-    private void loadSignups() {
-        if (eventDetailBean.getSelectedEvent() != null){
-            // hole die id aus dem event detail bean
-            // und lade alle signups zu dieser id
-            eventSignups = eventSignupRepository.findByEventId(
-                    eventDetailBean.getSelectedEvent().getId()
-            );
-        }
-    }
+    /*
+        ====== APPROVE ======
+     */
+    public void approve() {
 
-    private void loadSignupStatus(){
-        // lade den eingeloggten user
-        User currentUser = userLoginBean.getLoggedInUser();
-        if (currentUser != null && eventDetailBean.getSelectedEvent() != null){
-            // schaue nach, ob dieser user zu dem aktuellen event angemeldet ist
-            // sucht nach einer vorhandenen id kombination
-            isUserSignedUp = eventSignupService.isUserSignedUp(
-                    currentUser.getId(),
-                    eventDetailBean.getSelectedEvent().getId()
-            );
-        }
-    }
+        User reviewer = userLoginBean.getLoggedInUser();
 
-    public String signupUserForEvent(){
-        User currentUser = userLoginBean.getLoggedInUser();
-        if (currentUser == null){
+        if (reviewer == null) {
             facesContext.addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN,
-                            "Bitte anmelden.", null));
-            return "redirect:login";
-        }
-
-        Event currentEvent = eventDetailBean.getSelectedEvent();
-        if (currentEvent == null) {
-            facesContext.addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_WARN,
-                            "Event nicht gefunden.", null));
-            return null;
-        }
-        // implementierung der geschäftslogik im service
-        // hier im bean ist nur die kommunikation implementiert
-        boolean success = eventSignupService.signupUserForEvent(
-                currentUser.getId(),
-                currentEvent.getId()
-        );
-
-        if (success){
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
-                    "Sie haben sich erfolgreich für dieses Event registriert.", null));
-            isUserSignedUp = true;
-            loadSignups();
-            eventDetailBean.loadEvent();
-        } else {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                    "Registrierung fehlgeschlagen.", null));
-        }
-        return null;
-    }
-
-    public void cancelSignup(){
-        User currentUser = userLoginBean.getLoggedInUser();
-        if (currentUser == null){
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Nicht eingeloggt.", null));
             return;
         }
 
-        Event currentEvent = eventDetailBean.getSelectedEvent();
-        if (currentEvent == null) {
+        ReportReview review = new ReportReview();
+        review.setReport(selectedReport);
+        review.setReviewer(reviewer);
+        review.setStatus(ReviewStatus.APPROVED);
+        review.setComment(comment);
+
+        selectedReport.setStatus(ReviewStatus.APPROVED);
+
+        reportReviewRepository.save(review);
+        reportRepository.update(selectedReport);
+
+        facesContext.addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO,
+                        "Report wurde freigegeben.", null));
+
+        pendingReports = reportRepository.findPending();
+    }
+
+    /*
+        ====== REJECT ======
+     */
+    public void reject() {
+
+        User reviewer = userLoginBean.getLoggedInUser();
+
+        if (reviewer == null) {
             facesContext.addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Event nicht gefunden", null));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Nicht eingeloggt.", null));
             return;
         }
 
-        boolean success = eventSignupService.cancelSignup(
-                currentUser.getId(),
-                currentEvent.getId()
-        );
+        ReportReview review = new ReportReview();
+        review.setReport(selectedReport);
+        review.setReviewer(reviewer);
+        review.setStatus(ReviewStatus.REJECTED);
+        review.setComment(comment);
 
-        if (success) {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
-                    "Erfolgreich vom Event abgemeldet", null));
-            isUserSignedUp = false;
-            loadSignups();
-            eventDetailBean.loadEvent();
-        } else {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
-                    "Abmelden war nicht erfolgreich.", null));
-        }
+        selectedReport.setStatus(ReviewStatus.REJECTED);
+
+        reportReviewRepository.save(review);
+        reportRepository.update(selectedReport);
+
+        facesContext.addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_WARN,
+                        "Report wurde abgelehnt.", null));
+
+        pendingReports = reportRepository.findPending();
     }
 
-    public boolean getIsUserSignedUp() {
-        return isUserSignedUp;
+
+    public List<Report> getPendingReports() {
+        return pendingReports;
     }
 
-    public void setUserSignedUp(boolean userSignedUp) {
-        isUserSignedUp = userSignedUp;
+    public Report getSelectedReport() {
+        return selectedReport;
     }
 
-    public List<EventSignup> getEventSignups() {
-        return eventSignups;
+    public void setSelectedReport(Report selectedReport) {
+        this.selectedReport = selectedReport;
     }
 
-    public void setEventSignups(List<EventSignup> eventSignups) {
-        this.eventSignups = eventSignups;
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

@@ -7,14 +7,14 @@ public class ReportDTO {
     private String date;
     private String state;
 
-    public EventDTO(String name, String location, String date, String state){
+    public ReportDTO(String name, String location, String date, String state){
         this.name = name;
         this.location = location;
         this.date = date;
         this.state = state;
     }
 
-    public EventDTO() {}
+    public ReportDTO() {}
 
     public String getState() {
         return state;

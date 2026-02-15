@@ -1,0 +1,60 @@
+<ui:composition template="/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="content">
+
+        <h2>Offene Reports zur Prüfung</h2>
+
+        <h:dataTable value="#{reportReviewBean.pendingReports}"
+                     var="report" border="1">
+
+            <h:column>
+                <f:facet name="header">Land</f:facet>
+                #{report.country}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Jahr</f:facet>
+                #{report.year}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Emission</f:facet>
+                #{report.emissionValue}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Aktion</f:facet>
+
+                <h:form>
+
+                    <h:inputTextarea value="#{reportReviewBean.comment}"
+                                     cols="20" rows="2"
+                                     placeholder="Kommentar"/>
+
+                    <br/>
+
+                    <h:commandButton value="Freigeben"
+                                     action="#{reportReviewBean.approve}">
+                        <f:setPropertyActionListener
+                                target="#{reportReviewBean.selectedReport}"
+                                value="#{report}" />
+                    </h:commandButton>
+
+                    <h:commandButton value="Ablehnen"
+                                     action="#{reportReviewBean.reject}">
+                        <f:setPropertyActionListener
+                                target="#{reportReviewBean.selectedReport}"
+                                value="#{report}" />
+                    </h:commandButton>
+
+                </h:form>
+
+            </h:column>
+
+        </h:dataTable>
+
+    </ui:define>
+</ui:composition>
