@@ -28,5 +28,6 @@ public class MyReportsBean {
                 loginBean.getLoggedInUser());
     }
 
+
 }
 

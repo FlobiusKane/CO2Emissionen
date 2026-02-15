@@ -19,14 +19,25 @@
 
         <nav>
             <h:link value="Start" outcome="/index.xhtml"/>
+        <h:panelGroup>
+                <h:panelGroup rendered="#{userLoginBean.loggedIn}">
 
-            <h:panelGroup rendered="#{userLoginBean.loggedIn}">
                 |
                 <h:link value="Alle Reports" outcome="/reports.xhtml"/>
-                |
-                <h:link value="Meine Reports" outcome="/my-reports.xhtml"/>
 
-                <!-- Nur Reviewer oder Admin sehen Review -->
+                <h:panelGroup rendered="#{
+                                        userLoginBean.loggedInUser.role eq 'RESEARCHER'
+                                        or userLoginBean.loggedInUser.role eq 'ADMIN'}">
+
+                    |
+                    <h:link value="Meine Reports" outcome="/my-reports.xhtml"/>
+
+                </h:panelGroup>
+
+                </h:panelGroup>
+
+
+            <!-- Nur Reviewer oder Admin sehen Review -->
                 <h:panelGroup rendered="#{userLoginBean.loggedInUser.reviewer or userLoginBean.loggedInUser.admin}">
                     |
                     <h:link value="Review" outcome="/review.xhtml"/>

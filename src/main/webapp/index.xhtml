@@ -41,10 +41,16 @@
                                      action="/reports.xhtml?faces-redirect=true"/>
                 </h:form>
 
+
+                <h:panelGroup rendered="#{
+                        userLoginBean.loggedInUser.role eq 'RESEARCHER'
+                        or userLoginBean.loggedInUser.role eq 'ADMIN'}">
                 <h:form>
                     <h:commandButton value="Meine Reports"
                                      action="/my-reports.xhtml?faces-redirect=true"/>
                 </h:form>
+
+                </h:panelGroup>
 
                 <h:panelGroup rendered="#{
                         userLoginBean.loggedInUser.role eq 'REVIEWER'
