@@ -1,6 +1,8 @@
 package com.example.emissionen.report;
 
 import com.example.emissionen.repository.ReportRepository;
+import com.example.emissionen.repository.ReportReviewRepository;
+import com.example.emissionen.reportreview.ReportReview;
 import com.example.emissionen.usermanagement.User;
 import com.example.emissionen.usermanagement.UserLoginBean;
 import com.example.emissionen.usermanagement.UserRole;
@@ -19,14 +21,16 @@ public class ReportDetailsBean implements Serializable {
     private ReportRepository reportRepository;
 
     @Inject
+    private ReportReviewRepository reportReviewRepository;
+
+    @Inject
     private UserLoginBean userLoginBean;
 
     private Long reportId;
     private Report selectedReport;
 
-    /*
-        ====== Initialisierung ======
-     */
+    private ReportReview latestReview;
+
     @PostConstruct
     public void init() {
         loadReport();
@@ -35,70 +39,48 @@ public class ReportDetailsBean implements Serializable {
     public void loadReport() {
         if (reportId == null) {
             selectedReport = null;
+            latestReview = null;
             return;
         }
 
         selectedReport = reportRepository.findById(reportId);
+
+        if (selectedReport != null) {
+            latestReview = reportReviewRepository.findLatestByReportId(reportId);
+        } else {
+            latestReview = null;
+        }
     }
 
-    /*
-        ====== Zugriffskontrolle ======
-     */
-    public boolean canEditReport() {
+    public ReportReview getLatestReview() {
+        return latestReview;
+    }
 
+    public String getLatestReviewerName() {
+        if (latestReview == null || latestReview.getReviewer() == null) return "";
+        return latestReview.getReviewer().getFirstname() + " " + latestReview.getReviewer().getName();
+    }
+
+    public boolean canEditReport() {
         User currentUser = userLoginBean.getLoggedInUser();
 
-        if (currentUser == null || selectedReport == null) {
-            return false;
-        }
+        if (currentUser == null || selectedReport == null) return false;
+        if (currentUser.getRole() == UserRole.ADMIN) return true;
+        if (currentUser.getRole() == UserRole.REVIEWER) return true;
 
-        // Admin darf immer
-        if (currentUser.getRole() == UserRole.ADMIN) {
-            return true;
-        }
-
-        // Reviewer darf prüfen
-        if (currentUser.getRole() == UserRole.REVIEWER) {
-            return true;
-        }
-
-        // Researcher darf nur eigene Reports bearbeiten
         return selectedReport.getSubmittedBy() != null
-                && currentUser.getId()
-                .equals(selectedReport.getSubmittedBy().getId());
+                && currentUser.getId().equals(selectedReport.getSubmittedBy().getId());
     }
 
-    /*
-        ====== Anzeige Autorname ======
-     */
     public String getAuthorName() {
-
-        if (selectedReport == null
-                || selectedReport.getSubmittedBy() == null) {
-            return "";
-        }
-
+        if (selectedReport == null || selectedReport.getSubmittedBy() == null) return "";
         User author = selectedReport.getSubmittedBy();
         return author.getFirstname() + " " + author.getName();
     }
 
-    /*
-        ====== Getter & Setter ======
-     */
+    public Long getReportId() { return reportId; }
+    public void setReportId(Long reportId) { this.reportId = reportId; }
 
-    public Long getReportId() {
-        return reportId;
-    }
-
-    public void setReportId(Long reportId) {
-        this.reportId = reportId;
-    }
-
-    public Report getSelectedReport() {
-        return selectedReport;
-    }
-
-    public void setSelectedReport(Report selectedReport) {
-        this.selectedReport = selectedReport;
-    }
+    public Report getSelectedReport() { return selectedReport; }
+    public void setSelectedReport(Report selectedReport) { this.selectedReport = selectedReport; }
 }

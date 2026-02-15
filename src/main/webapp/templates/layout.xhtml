@@ -27,12 +27,11 @@
                 <h:link value="Meine Reports" outcome="/my-reports.xhtml"/>
 
                 <!-- Nur Reviewer oder Admin sehen Review -->
-                <h:panelGroup rendered="#{
-                        userLoginBean.loggedInUser.role eq 'REVIEWER'
-                        or userLoginBean.loggedInUser.role eq 'ADMIN'}">
+                <h:panelGroup rendered="#{userLoginBean.loggedInUser.reviewer or userLoginBean.loggedInUser.admin}">
                     |
                     <h:link value="Review" outcome="/review.xhtml"/>
                 </h:panelGroup>
+
             </h:panelGroup>
         </nav>
 

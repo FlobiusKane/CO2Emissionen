@@ -1,4 +1,4 @@
-<ui:composition template="/template.xhtml"
+<ui:composition template="/templates/layout.xhtml"
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
                 xmlns:ui="jakarta.faces.facelets"
@@ -32,6 +32,32 @@
             <h:outputText value="#{reportDetailsBean.authorName}" />
 
         </h:panelGrid>
+
+
+        <h3>Review-Information</h3>
+
+        <h:panelGroup rendered="#{not empty reportDetailsBean.latestReview}">
+            <h:panelGrid columns="2">
+
+                <h:outputText value="Reviewer:"/>
+                <h:outputText value="#{reportDetailsBean.latestReviewerName}"/>
+
+                <h:outputText value="Review-Status:"/>
+                <h:outputText value="#{reportDetailsBean.latestReview.status}"/>
+
+                <h:outputText value="Kommentar:"/>
+                <h:outputText value="#{reportDetailsBean.latestReview.comment}"/>
+
+                <h:outputText value="Datum:"/>
+                <h:outputText value="#{reportDetailsBean.latestReview.reviewDate}"/>
+
+            </h:panelGrid>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{empty reportDetailsBean.latestReview}">
+            <p>Noch kein Review vorhanden (Status ist aktuell: #{reportDetailsBean.selectedReport.status}).</p>
+        </h:panelGroup>
+
 
     </ui:define>
 </ui:composition>

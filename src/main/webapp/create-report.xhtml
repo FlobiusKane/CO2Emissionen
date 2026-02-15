@@ -1,0 +1,43 @@
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:f="jakarta.faces.core">
+
+    <ui:define name="content">
+
+        <h2>Neuen Report einreichen</h2>
+
+        <h:messages globalOnly="true" layout="list" styleClass="messages"/>
+
+        <h:form>
+            <h:panelGrid columns="2">
+
+                <h:outputLabel for="country" value="Land"/>
+                <h:inputText id="country"
+                             value="#{reportBean.report.country}"
+                             required="true"/>
+
+                <h:outputLabel for="year" value="Jahr"/>
+                <h:inputText id="year"
+                             value="#{reportBean.report.year}"
+                             required="true">
+                </h:inputText>
+
+                <h:outputLabel for="value" value="Emission (t CO₂)"/>
+                <h:inputText id="value"
+                             value="#{reportBean.report.emissionValue}"
+                             required="true">
+                </h:inputText>
+
+            </h:panelGrid>
+
+            <br/>
+
+            <h:commandButton value="Einreichen"
+                             action="#{reportBean.submit}"/>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>

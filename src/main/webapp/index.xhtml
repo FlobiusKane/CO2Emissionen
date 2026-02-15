@@ -1,15 +1,74 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:ui="jakarta.faces.facelets">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets">
 
     <ui:define name="content">
 
+        <h1>Willkommen im CO₂ Emissions Reporting System</h1>
+
+        <h:panelGroup rendered="#{!userLoginBean.loggedIn}">
+            <p>
+                Dieses System dient zur Erfassung und Prüfung von CO₂-Emissionsdaten.
+                Bitte melden Sie sich an oder registrieren Sie sich, um Reports einzureichen.
+            </p>
+
+            <h:link value="Login" outcome="/login.xhtml"/>
+            |
+            <h:link value="Registrieren" outcome="/register.xhtml"/>
+        </h:panelGroup>
+
+
+        <!-- ===== Dashboard für eingeloggte User ===== -->
+        <h:panelGroup rendered="#{userLoginBean.loggedIn}">
+
+            <h2>Dashboard</h2>
+
+            <p>
+                Willkommen #{userLoginBean.loggedInUser.firstname}!
+                Sie sind angemeldet als
+                <strong>#{userLoginBean.loggedInUser.role}</strong>.
+            </p>
+
+            <hr/>
+
+            <h3>Schnellzugriff</h3>
+
+            <h:panelGrid columns="3" cellpadding="10">
+
+                <h:form>
+                    <h:commandButton value="Alle Reports ansehen"
+                                     action="/reports.xhtml?faces-redirect=true"/>
+                </h:form>
+
+                <h:form>
+                    <h:commandButton value="Meine Reports"
+                                     action="/my-reports.xhtml?faces-redirect=true"/>
+                </h:form>
+
+                <h:panelGroup rendered="#{
+                        userLoginBean.loggedInUser.role eq 'REVIEWER'
+                        or userLoginBean.loggedInUser.role eq 'ADMIN'}">
+
+                    <h:form>
+                        <h:commandButton value="Offene Reviews"
+                                         action="/review.xhtml?faces-redirect=true"/>
+                    </h:form>
+
+                </h:panelGroup>
+
+            </h:panelGrid>
+
+            <hr/>
+
+            <h3>Systembeschreibung</h3>
+            <p>
+                Researcher können Emissionsberichte einreichen.
+                Reviewer prüfen diese Berichte und entscheiden über Freigabe oder Ablehnung.
+                Administratoren haben Zugriff auf alle Bereiche des Systems.
+            </p>
+
+        </h:panelGroup>
+
     </ui:define>
-
 </ui:composition>
-
-</html>

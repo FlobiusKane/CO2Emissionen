@@ -2,10 +2,10 @@ package com.example.emissionen.report;
 
 import com.example.emissionen.reportreview.ReportReview;
 import com.example.emissionen.reportreview.ReviewStatus;
-import com.example.emissionen.review.Review;
 import com.example.emissionen.usermanagement.User;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,7 +16,9 @@ public class Report {
     private Long id;
 
     private String country;
+    @Column(name = "report_year")
     private int year;
+
     private double emissionValue;
 
     @Enumerated(EnumType.STRING)
@@ -25,12 +27,8 @@ public class Report {
     @ManyToOne
     private User submittedBy;
 
-    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
-    private List<Review> reviews;
-
-    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL)
-    private List<ReportReview> reportReviews;
-
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReportReview> reportReviews = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -80,11 +78,11 @@ public class Report {
         this.submittedBy = submittedBy;
     }
 
-    public List<Review> getReviews() {
-        return reviews;
+    public List<ReportReview> getReportReviews() {
+        return reportReviews;
     }
 
-    public void setReviews(List<Review> reviews) {
-        this.reviews = reviews;
+    public void setReportReviews(List<ReportReview> reportReviews) {
+        this.reportReviews = reportReviews;
     }
 }

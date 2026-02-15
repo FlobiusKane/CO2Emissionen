@@ -1,13 +1,23 @@
-<ui:composition template="/template.xhtml"
+<ui:composition template="/templates/layout.xhtml"
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
-                xmlns:ui="jakarta.faces.facelets">
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:f="jakarta.faces.core">
 
     <ui:define name="content">
 
         <h2>Meine Reports</h2>
 
-        <h:dataTable value="#{reportBean.myReports}" var="report" border="1">
+        <h:panelGroup rendered="#{userLoginBean.loggedInUser.researcher or userLoginBean.loggedInUser.admin}">
+            <h:form>
+                <h:commandButton value="Neuen Report einreichen"
+                                 action="/create-report.xhtml?faces-redirect=true"/>
+            </h:form>
+        </h:panelGroup>
+
+        <br/>
+
+        <h:dataTable value="#{myReportsBean.myReports}" var="report" border="1">
 
             <h:column>
                 <f:facet name="header">Land</f:facet>
@@ -27,6 +37,13 @@
             <h:column>
                 <f:facet name="header">Status</f:facet>
                 #{report.status}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Details</f:facet>
+                <h:link value="Anzeigen" outcome="/report-details.xhtml">
+                    <f:param name="reportId" value="#{report.id}" />
+                </h:link>
             </h:column>
 
         </h:dataTable>

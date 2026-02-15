@@ -44,6 +44,13 @@ public class UserRegistrationBean implements Serializable {
             return;
         }
 
+        if (userRepository.usernameExists(userRegistrationDTO.getUsername())) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Fehler", "Username ist bereits vergeben."));
+            return;
+        }
+
+
         userRegistrationDTO.setPassword(PWUtil.hashPassword(userRegistrationDTO.getPassword()));
         // übersetze DTO zur Entity
         User user = new User(userRegistrationDTO);

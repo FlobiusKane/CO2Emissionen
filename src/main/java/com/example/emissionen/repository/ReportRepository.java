@@ -2,8 +2,10 @@ package com.example.emissionen.repository;
 
 import com.example.emissionen.report.Report;
 import com.example.emissionen.reportreview.ReviewStatus;
+import com.example.emissionen.usermanagement.User;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Persistence;
 
 import java.util.List;
 
@@ -11,7 +13,7 @@ import java.util.List;
 public class ReportRepository {
 
     private final EntityManager em =
-            Persistence.createEntityManagerFactory("emissionPU")
+            Persistence.createEntityManagerFactory("emissionenPU")
                     .createEntityManager();
 
     public void save(Report report) {
@@ -44,11 +46,11 @@ public class ReportRepository {
     }
 
 
-    public List<Report> findByUser(Long userId) {
+    public List<Report> findByUser(User user) {
         return em.createQuery(
-                        "SELECT r FROM Report r WHERE r.submittedBy.id = :uid",
+                        "SELECT r FROM Report r WHERE r.submittedBy = :user",
                         Report.class)
-                .setParameter("uid", userId)
+                .setParameter("user", user)
                 .getResultList();
     }
 }

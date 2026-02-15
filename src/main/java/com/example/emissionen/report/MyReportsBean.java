@@ -20,8 +20,13 @@ public class MyReportsBean {
     private UserLoginBean loginBean;
 
     public List<Report> getMyReports() {
+        if (loginBean.getLoggedInUser() == null) {
+            return List.of();
+        }
+
         return reportRepository.findByUser(
-                loginBean.getLoggedInUser().getId());
+                loginBean.getLoggedInUser());
     }
+
 }
 
