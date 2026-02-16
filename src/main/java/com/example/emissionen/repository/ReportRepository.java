@@ -53,4 +53,53 @@ public class ReportRepository {
                 .setParameter("user", user)
                 .getResultList();
     }
+
+
+    public List<Report> search(String country,
+                               Integer yearFrom,
+                               Integer yearTo,
+                               ReviewStatus status,
+                               String sortBy,
+                               String sortDir) {
+
+        // Whitelist für sortBy (wichtig: schützt vor JPQL Injection)
+        String sortField = switch (sortBy) {
+            case "country" -> "r.country";
+            case "year" -> "r.year";
+            case "emissionValue" -> "r.emissionValue";
+            case "status" -> "r.status";
+            default -> "r.year";
+        };
+
+        String direction = "ASC".equalsIgnoreCase(sortDir) ? "ASC" : "DESC";
+
+        StringBuilder jpql = new StringBuilder("SELECT r FROM Report r WHERE 1=1");
+
+        if (country != null && !country.trim().isEmpty()) {
+            jpql.append(" AND LOWER(r.country) LIKE :country");
+        }
+        if (yearFrom != null) {
+            jpql.append(" AND r.year >= :yearFrom");
+        }
+        if (yearTo != null) {
+            jpql.append(" AND r.year <= :yearTo");
+        }
+        if (status != null) {
+            jpql.append(" AND r.status = :status");
+        }
+
+        jpql.append(" ORDER BY ").append(sortField).append(" ").append(direction);
+
+        var query = em.createQuery(jpql.toString(), Report.class);
+
+        if (country != null && !country.trim().isEmpty()) {
+            query.setParameter("country", "%" + country.trim().toLowerCase() + "%");
+        }
+        if (yearFrom != null) query.setParameter("yearFrom", yearFrom);
+        if (yearTo != null) query.setParameter("yearTo", yearTo);
+        if (status != null) query.setParameter("status", status);
+
+        return query.getResultList();
+    }
+
 }

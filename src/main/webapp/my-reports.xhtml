@@ -17,6 +17,49 @@
 
         <br/>
 
+        <h:form>
+            <h:panelGrid columns="6" cellpadding="5">
+
+                <h:outputLabel value="Land"/>
+                <h:inputText value="#{reportListBean.country}" />
+
+                <h:outputLabel value="Jahr von"/>
+                <h:inputText value="#{reportListBean.yearFrom}" />
+
+                <h:outputLabel value="Jahr bis"/>
+                <h:inputText value="#{reportListBean.yearTo}" />
+
+                <h:outputLabel value="Status"/>
+                <h:selectOneMenu value="#{reportListBean.status}">
+                    <f:selectItem itemLabel="(alle)" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{reportListBean.availableStatuses}"/>
+                </h:selectOneMenu>
+
+                <h:outputLabel value="Sortieren nach"/>
+                <h:selectOneMenu value="#{reportListBean.sortBy}">
+                    <f:selectItem itemLabel="Land" itemValue="country"/>
+                    <f:selectItem itemLabel="Jahr" itemValue="year"/>
+                    <f:selectItem itemLabel="Emission" itemValue="emissionValue"/>
+                    <f:selectItem itemLabel="Status" itemValue="status"/>
+                </h:selectOneMenu>
+
+                <h:outputLabel value="Richtung"/>
+                <h:selectOneMenu value="#{reportListBean.sortDir}">
+                    <f:selectItem itemLabel="Absteigend" itemValue="DESC"/>
+                    <f:selectItem itemLabel="Aufsteigend" itemValue="ASC"/>
+                </h:selectOneMenu>
+
+            </h:panelGrid>
+
+            <br/>
+
+            <h:commandButton value="Filtern" action="#{reportListBean.search}"/>
+            <h:commandButton value="Zurücksetzen" action="#{reportListBean.reset}"/>
+
+        </h:form>
+
+        <br/>
+
         <h:dataTable value="#{myReportsBean.myReports}" var="report" border="1">
 
             <h:column>

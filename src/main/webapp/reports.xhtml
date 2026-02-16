@@ -6,7 +6,7 @@
 
     <ui:define name="content">
 
-        <h1>Alle Reports</h1>
+        <h2>Alle Emissions-Reports</h2>
 
         <h:panelGroup rendered="#{userLoginBean.loggedInUser.researcher or userLoginBean.loggedInUser.admin}">
             <h:form>
@@ -15,13 +15,52 @@
             </h:form>
         </h:panelGroup>
 
+        <!-- Filter + Sort -->
+        <h:form>
+            <h:panelGrid columns="6" cellpadding="5">
+
+                <h:outputLabel value="Land"/>
+                <h:inputText value="#{reportListBean.country}" />
+
+                <h:outputLabel value="Jahr von"/>
+                <h:inputText value="#{reportListBean.yearFrom}" />
+
+                <h:outputLabel value="Jahr bis"/>
+                <h:inputText value="#{reportListBean.yearTo}" />
+
+                <h:outputLabel value="Status"/>
+                <h:selectOneMenu value="#{reportListBean.status}">
+                    <f:selectItem itemLabel="(alle)" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItems value="#{reportListBean.availableStatuses}"/>
+                </h:selectOneMenu>
+
+                <h:outputLabel value="Sortieren nach"/>
+                <h:selectOneMenu value="#{reportListBean.sortBy}">
+                    <f:selectItem itemLabel="Land" itemValue="country"/>
+                    <f:selectItem itemLabel="Jahr" itemValue="year"/>
+                    <f:selectItem itemLabel="Emission" itemValue="emissionValue"/>
+                    <f:selectItem itemLabel="Status" itemValue="status"/>
+                </h:selectOneMenu>
+
+                <h:outputLabel value="Richtung"/>
+                <h:selectOneMenu value="#{reportListBean.sortDir}">
+                    <f:selectItem itemLabel="Absteigend" itemValue="DESC"/>
+                    <f:selectItem itemLabel="Aufsteigend" itemValue="ASC"/>
+                </h:selectOneMenu>
+
+            </h:panelGrid>
+
+            <br/>
+
+            <h:commandButton value="Filtern" action="#{reportListBean.search}"/>
+            <h:commandButton value="Zurücksetzen" action="#{reportListBean.reset}"/>
+
+        </h:form>
+
         <br/>
 
-
-        <h:dataTable value="#{reportBean.allReports}"
-                     var="report"
-                     border="1"
-                     styleClass="report-table">
+        <!-- Tabelle -->
+        <h:dataTable value="#{reportListBean.reports}" var="report" border="1">
 
             <h:column>
                 <f:facet name="header">Land</f:facet>
@@ -34,7 +73,7 @@
             </h:column>
 
             <h:column>
-                <f:facet name="header">Emission</f:facet>
+                <f:facet name="header">Emission (t CO₂)</f:facet>
                 #{report.emissionValue}
             </h:column>
 
@@ -45,7 +84,7 @@
 
             <h:column>
                 <f:facet name="header">Details</f:facet>
-                <h:link value="Mehr erfahren" outcome="/report-details.xhtml">
+                <h:link value="Anzeigen" outcome="/report-details.xhtml">
                     <f:param name="reportId" value="#{report.id}" />
                 </h:link>
             </h:column>
