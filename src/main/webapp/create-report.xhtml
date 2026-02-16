@@ -19,15 +19,11 @@
                              required="true"/>
 
                 <h:outputLabel for="year" value="Jahr"/>
-                <h:inputText id="year"
-                             value="#{reportBean.report.year}"
-                             required="true">
+                <h:inputText value="#{reportBean.report.year}" required="true">
                 </h:inputText>
 
                 <h:outputLabel for="value" value="Emission (t CO₂)"/>
-                <h:inputText id="value"
-                             value="#{reportBean.report.emissionValue}"
-                             required="true">
+                <h:inputText value="#{reportBean.report.emissionValue}" required="true" >
                 </h:inputText>
 
             </h:panelGrid>

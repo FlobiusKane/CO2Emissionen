@@ -17,9 +17,9 @@ public class Report {
 
     private String country;
     @Column(name = "report_year")
-    private int year;
+    private Integer year;
 
-    private double emissionValue;
+    private Double emissionValue;
 
     @Enumerated(EnumType.STRING)
     private ReviewStatus status = ReviewStatus.PENDING;
@@ -46,21 +46,13 @@ public class Report {
         this.country = country;
     }
 
-    public int getYear() {
-        return year;
-    }
+    public Integer getYear() { return year; }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
+    public void setYear(Integer year) { this.year = year; }
 
-    public double getEmissionValue() {
-        return emissionValue;
-    }
+    public Double getEmissionValue() { return emissionValue; }
 
-    public void setEmissionValue(double emissionValue) {
-        this.emissionValue = emissionValue;
-    }
+    public void setEmissionValue(Double emissionValue) { this.emissionValue = emissionValue; }
 
     public ReviewStatus getStatus() {
         return status;
