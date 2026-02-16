@@ -14,6 +14,13 @@
 
         <h2>Report Details</h2>
 
+        <h:panelGroup rendered="#{reportDetailsBean.canEditReport()}">
+            <h:link value="Report bearbeiten" outcome="/edit-report.xhtml">
+                <f:param name="reportId" value="#{reportDetailsBean.selectedReport.id}" />
+            </h:link>
+        </h:panelGroup>
+
+
         <h:panelGrid columns="2">
 
             <h:outputText value="Land:"/>

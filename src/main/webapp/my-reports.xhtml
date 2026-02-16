@@ -20,6 +20,14 @@
         <h:dataTable value="#{myReportsBean.myReports}" var="report" border="1">
 
             <h:column>
+                <f:facet name="header">Bearbeiten</f:facet>
+                <h:link value="Edit" outcome="/edit-report.xhtml">
+                    <f:param name="reportId" value="#{report.id}" />
+                </h:link>
+            </h:column>
+
+
+            <h:column>
                 <f:facet name="header">Land</f:facet>
                 #{report.country}
             </h:column>

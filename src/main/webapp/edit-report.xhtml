@@ -6,7 +6,12 @@
 
     <ui:define name="content">
 
-        <h2>Neuen Report einreichen</h2>
+        <f:metadata>
+            <f:viewParam name="reportId" value="#{reportEditBean.reportId}" />
+            <f:viewAction action="#{reportEditBean.load}" />
+        </f:metadata>
+
+        <h2>Report bearbeiten</h2>
 
         <h:messages globalOnly="true" layout="list" styleClass="messages"/>
 
@@ -14,25 +19,19 @@
             <h:panelGrid columns="2">
 
                 <h:outputLabel for="country" value="Land"/>
-                <h:inputText id="country"
-                             value="#{reportBean.report.country}"
-                             required="true"/>
+                <h:inputText id="country" value="#{reportEditBean.report.country}" required="true"/>
 
                 <h:outputLabel for="year" value="Jahr"/>
-                <h:inputText id="year" value="#{reportBean.report.year}" required="true">
-                </h:inputText>
+                <h:inputText id="year" value="#{reportEditBean.report.year}" required="true"/>
 
                 <h:outputLabel for="value" value="Emission (t CO₂)"/>
-                <h:inputText id="value" value="#{reportBean.report.emissionValue}" required="true" >
-                </h:inputText>
+                <h:inputText id="value" value="#{reportEditBean.report.emissionValue}" required="true"/>
 
             </h:panelGrid>
 
             <br/>
 
-            <h:commandButton value="Einreichen"
-                             action="#{reportBean.submit}"/>
-
+            <h:commandButton value="Speichern" action="#{reportEditBean.save}"/>
         </h:form>
 
     </ui:define>

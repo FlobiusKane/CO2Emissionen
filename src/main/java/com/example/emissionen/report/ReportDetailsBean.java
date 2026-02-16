@@ -63,14 +63,21 @@ public class ReportDetailsBean implements Serializable {
 
     public boolean canEditReport() {
         User currentUser = userLoginBean.getLoggedInUser();
-
         if (currentUser == null || selectedReport == null) return false;
-        if (currentUser.getRole() == UserRole.ADMIN) return true;
-        if (currentUser.getRole() == UserRole.REVIEWER) return true;
 
+        if (currentUser.getRole() == UserRole.ADMIN) return true;
+
+        // Nur Autor darf bearbeiten
         return selectedReport.getSubmittedBy() != null
                 && currentUser.getId().equals(selectedReport.getSubmittedBy().getId());
     }
+
+    public boolean canReview() {
+        User currentUser = userLoginBean.getLoggedInUser();
+        if (currentUser == null) return false;
+        return currentUser.getRole() == UserRole.REVIEWER || currentUser.getRole() == UserRole.ADMIN;
+    }
+
 
     public String getAuthorName() {
         if (selectedReport == null || selectedReport.getSubmittedBy() == null) return "";
