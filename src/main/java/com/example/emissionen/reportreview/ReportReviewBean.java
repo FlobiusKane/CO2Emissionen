@@ -2,8 +2,6 @@ package com.example.emissionen.reportreview;
 
 import com.example.emissionen.report.Report;
 import com.example.emissionen.repository.ReportRepository;
-import com.example.emissionen.repository.ReportReviewRepository;
-import com.example.emissionen.usermanagement.User;
 import com.example.emissionen.usermanagement.UserLoginBean;
 import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
@@ -23,10 +21,10 @@ public class ReportReviewBean implements Serializable {
     private ReportRepository reportRepository;
 
     @Inject
-    private ReportReviewRepository reportReviewRepository;
+    private UserLoginBean userLoginBean;
 
     @Inject
-    private UserLoginBean userLoginBean;
+    private com.example.emissionen.service.ReviewService reviewService;
 
     @Inject
     private FacesContext facesContext;
@@ -41,68 +39,20 @@ public class ReportReviewBean implements Serializable {
         pendingReports = reportRepository.findPending();
     }
 
-    /*
-        ====== APPROVE ======
-     */
     public void approve() {
-
-        User reviewer = userLoginBean.getLoggedInUser();
-
-        if (reviewer == null) {
-            facesContext.addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Nicht eingeloggt.", null));
-            return;
-        }
-
-        ReportReview review = new ReportReview();
-        review.setReport(selectedReport);
-        review.setReviewer(reviewer);
-        review.setStatus(ReviewStatus.APPROVED);
-        review.setComment(comment);
-
-        selectedReport.setStatus(ReviewStatus.APPROVED);
-
-        reportReviewRepository.save(review);
-        reportRepository.update(selectedReport);
-
-        facesContext.addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO,
-                        "Report wurde freigegeben.", null));
-
+        boolean ok = reviewService.approve(selectedReport.getId(), userLoginBean.getLoggedInUser(), comment);
+        facesContext.addMessage(null, new FacesMessage(ok ? FacesMessage.SEVERITY_INFO : FacesMessage.SEVERITY_ERROR,
+                ok ? "Freigegeben" : "Fehlgeschlagen", null));
         pendingReports = reportRepository.findPending();
+        comment = null;
     }
 
-    /*
-        ====== REJECT ======
-     */
     public void reject() {
-
-        User reviewer = userLoginBean.getLoggedInUser();
-
-        if (reviewer == null) {
-            facesContext.addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Nicht eingeloggt.", null));
-            return;
-        }
-
-        ReportReview review = new ReportReview();
-        review.setReport(selectedReport);
-        review.setReviewer(reviewer);
-        review.setStatus(ReviewStatus.REJECTED);
-        review.setComment(comment);
-
-        selectedReport.setStatus(ReviewStatus.REJECTED);
-
-        reportReviewRepository.save(review);
-        reportRepository.update(selectedReport);
-
-        facesContext.addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_WARN,
-                        "Report wurde abgelehnt.", null));
-
+        boolean ok = reviewService.reject(selectedReport.getId(), userLoginBean.getLoggedInUser(), comment);
+        facesContext.addMessage(null, new FacesMessage(ok ? FacesMessage.SEVERITY_WARN : FacesMessage.SEVERITY_ERROR,
+                ok ? "Abgelehnt" : "Fehlgeschlagen", null));
         pendingReports = reportRepository.findPending();
+        comment = null;
     }
 
 
@@ -126,3 +76,5 @@ public class ReportReviewBean implements Serializable {
         this.comment = comment;
     }
 }
+
+

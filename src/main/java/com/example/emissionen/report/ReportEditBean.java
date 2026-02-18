@@ -1,10 +1,9 @@
 package com.example.emissionen.report;
 
 import com.example.emissionen.repository.ReportRepository;
-import com.example.emissionen.reportreview.ReviewStatus;
-import com.example.emissionen.usermanagement.User;
+import com.example.emissionen.service.ReportService;
 import com.example.emissionen.usermanagement.UserLoginBean;
-import com.example.emissionen.usermanagement.UserRole;
+import jakarta.annotation.PostConstruct;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -17,57 +16,33 @@ import java.io.Serializable;
 @ViewScoped
 public class ReportEditBean implements Serializable {
 
-    @Inject
-    private ReportRepository reportRepository;
-
-    @Inject
-    private UserLoginBean userLoginBean;
-
-    @Inject
-    private FacesContext facesContext;
+    @Inject private ReportRepository reportRepository;
+    @Inject private ReportService reportService;
+    @Inject private UserLoginBean userLoginBean;
 
     private Long reportId;
     private Report report;
 
+    @PostConstruct
+    public void init() {
+        // leer – load wird per f:viewAction gemacht
+    }
+
     public void load() {
-        if (reportId == null) {
-            report = null;
-            return;
-        }
-
+        if (reportId == null) return;
         report = reportRepository.findById(reportId);
-
-        User currentUser = userLoginBean.getLoggedInUser();
-        if (report == null || currentUser == null) {
-            report = null;
-            return;
-        }
-
-        // Zugriff: Admin oder Autor
-        boolean allowed = currentUser.getRole() == UserRole.ADMIN
-                || (report.getSubmittedBy() != null && currentUser.getId().equals(report.getSubmittedBy().getId()));
-
-        if (!allowed) {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                    "Keine Berechtigung", "Du darfst diesen Report nicht bearbeiten."));
-            report = null;
-        }
     }
 
     public String save() {
         if (report == null) return null;
 
-        // Wenn bereits reviewed wurde: wieder auf PENDING setzen
-        if (report.getStatus() == ReviewStatus.APPROVED || report.getStatus() == ReviewStatus.REJECTED) {
-            report.setStatus(ReviewStatus.PENDING);
-        }
+        boolean ok = reportService.update(report.getId(), report, userLoginBean.getLoggedInUser());
 
-        reportRepository.update(report);
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(ok ? FacesMessage.SEVERITY_INFO : FacesMessage.SEVERITY_ERROR,
+                        ok ? "Gespeichert – Status wieder PENDING." : "Keine Berechtigung / Fehler.", null));
 
-        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
-                "Gespeichert", "Der Report wurde gespeichert (ggf. erneut zur Prüfung eingereicht)."));
-
-        return "/report-details.xhtml?faces-redirect=true&reportId=" + report.getId();
+        return ok ? "/report-details.xhtml?faces-redirect=true&reportId=" + report.getId() : null;
     }
 
     public Long getReportId() { return reportId; }
